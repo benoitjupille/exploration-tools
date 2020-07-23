@@ -12,8 +12,8 @@
 */
 
 #include <Arduboy2.h>
-#include "src/shared/Timer.h"
-#include "src/radar/BlinkingPoint.h"
+#include "src/radar/DetectedPoint.h"
+#include "src/radar/Radar.h"
 
 // make an instance of arduboy used for many functions
 Arduboy2 arduboy;
@@ -28,17 +28,17 @@ int counter = 44;
 int counterDecimal = 7;
 int moving = 10;
 
-BlinkingPoint points[5] {
-    BlinkingPoint(),
-    BlinkingPoint(),
-    BlinkingPoint(),
-    BlinkingPoint(),
-    BlinkingPoint()
+DetectedPoint points[5] {
+    DetectedPoint(),
+    DetectedPoint(),
+    DetectedPoint(),
+    DetectedPoint(),
+    DetectedPoint()
 };
 
 int indexLastActivatedPoint = 0;
 
-bool aHasBeenPressedOnce = false;
+Radar radar;
 
 // This function runs once in your game.
 // use it for anything that needs to be set only once in your game.
@@ -70,20 +70,15 @@ void loop()
     // (positions start at 0, 0)
     arduboy.setCursor(4, 9);
 
-    // then we print to screen what is in the Quotation marks ""
-    drawCircleCentered(4);
-    drawCircleCentered(16);
-    drawCircleCentered(28);
-
+    radar.init(arduboy);
     drawScanner();
     drawCounter();
 
     if (arduboy.justPressed(A_BUTTON)) {
-        aHasBeenPressedOnce = true;
         handlePointsVisibility();
     }
 
-    animateBlinkingPoints();
+    animatePoints();
 
     // then we finaly we tell the arduboy to display what we just wrote to the display
     arduboy.display();
@@ -114,7 +109,8 @@ void drawScanner()
         arduboy.drawLine(
             arduboy.width() / 2, arduboy.height() / 2,
             arduboy.width() / 2 + cos(angle - line) * 28, arduboy.height() / 2 + sin(angle - line) * 28,
-            WHITE);
+            WHITE
+        );
         line = line - 0.02;
     }
 
@@ -135,7 +131,7 @@ void drawCircleCentered(int rayon)
     );
 }
 
-void animateBlinkingPoints()
+void animatePoints()
 {
     for (int i=0; i < 5; i++) {
         points[i].animate(arduboy);
