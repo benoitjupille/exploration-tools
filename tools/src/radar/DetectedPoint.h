@@ -91,7 +91,15 @@ public:
             );
         }
 
-        // animation lasts 1400 milliseconds
+        if (pointTimer.getElapsedTime() >= 1500 && pointTimer.getElapsedTime() < 1600) {
+            arduboy.drawCircle(
+                x, y,
+                3,
+                WHITE
+            );
+        }
+
+        // animation lasts 1600 milliseconds
         if (pointTimer.getElapsedTime() >= 1600) {
             pointTimer.updatePreviousTime();
         }
