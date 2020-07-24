@@ -13,11 +13,13 @@
 
 #include <Arduboy2.h>
 #include "src/radar/Radar.h"
+#include "src/phone/Phone.h"
 
 // make an instance of arduboy used for many functions
 Arduboy2 arduboy;
 
 Radar radar;
+Phone phone;
 
 // This function runs once in your game.
 // use it for anything that needs to be set only once in your game.
@@ -31,6 +33,7 @@ void setup()
     arduboy.setFrameRate(15);
 
     arduboy.initRandomSeed();
+    arduboy.setCursor(0, 0);
 }
 
 // our main game loop, this runs once every cycle/frame.
@@ -45,7 +48,8 @@ void loop()
     arduboy.clear();
     arduboy.pollButtons();
 
-    radar.display(arduboy);
+    //radar.display(arduboy);
+    phone.display(arduboy);
 
     // then we finaly we tell the arduboy to display what we just wrote to the display
     arduboy.display();
