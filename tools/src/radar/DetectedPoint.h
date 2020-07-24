@@ -19,11 +19,20 @@ private:
     // y position
     int y;
 
+    // How many pixels will it move
+    int movingSpeed = 2;
+
+    // Moves every x milliseconds
+    int movingDelay = 700;
+
     // does the point has been activated
     bool visible = false;
 
-    // the timer
-    Timer pointTimer;
+    // the timer for blinking animation
+    Timer animationTimer;
+
+    // the timer for movement
+    Timer movementTimer;
 
 public:
 
@@ -69,13 +78,13 @@ public:
             return;
         }
 
-        pointTimer.updateCurrentTime();
+        move(arduboy);
 
-        if (pointTimer.getElapsedTime() >= 1000) {
-            arduboy.drawPixel(x, y, WHITE);
-        }
+        animationTimer.updateCurrentTime();
 
-        if (pointTimer.getElapsedTime() >= 1200 && pointTimer.getElapsedTime() < 1600) {
+        arduboy.drawPixel(x, y, WHITE);
+
+        if (animationTimer.getElapsedTime() >= 1200 && animationTimer.getElapsedTime() < 1600) {
             arduboy.drawCircle(
                 x, y,
                 1,
@@ -83,7 +92,7 @@ public:
             );
         }
 
-        if (pointTimer.getElapsedTime() >= 1400 && pointTimer.getElapsedTime() < 1500) {
+        if (animationTimer.getElapsedTime() >= 1400 && animationTimer.getElapsedTime() < 1500) {
             arduboy.drawCircle(
                 x, y,
                 2,
@@ -91,7 +100,7 @@ public:
             );
         }
 
-        if (pointTimer.getElapsedTime() >= 1500 && pointTimer.getElapsedTime() < 1600) {
+        if (animationTimer.getElapsedTime() >= 1500 && animationTimer.getElapsedTime() < 1600) {
             arduboy.drawCircle(
                 x, y,
                 3,
@@ -100,9 +109,26 @@ public:
         }
 
         // animation lasts 1600 milliseconds
-        if (pointTimer.getElapsedTime() >= 1600) {
-            pointTimer.updatePreviousTime();
+        if (animationTimer.getElapsedTime() >= 1600) {
+            animationTimer.updatePreviousTime();
         }
+    }
+
+    /**
+     * Makes the point moving if it has been triggered (B Button)
+     */
+    void move(Arduboy2 arduboy)
+    {
+        movementTimer.updateCurrentTime();
+
+        if (movementTimer.getElapsedTime() < movingDelay) {
+            return;
+        }
+
+        x = x + random(-movingSpeed, movingSpeed + 1);
+        y = y + random(-movingSpeed, movingSpeed + 1);
+
+        movementTimer.updatePreviousTime();
     }
 };
 
