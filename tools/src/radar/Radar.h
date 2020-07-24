@@ -60,6 +60,16 @@ struct Radar
             handlePointsVisibility();
         }
 
+        if (arduboy.justPressed(B_BUTTON)) {
+            points[indexLastActivatedPoint - 1].makeItMove();
+        }
+
+        if (arduboy.pressed(UP_BUTTON)) {
+            speed = 0.4;
+        } else {
+            speed = 0.1;
+        }
+
         animatePoints(arduboy);
         drawCounter(arduboy);
     }
@@ -93,7 +103,7 @@ struct Radar
     void animatePoints(Arduboy2 arduboy)
     {
         for (int i=0; i < 5; i++) {
-            points[i].animate(arduboy);
+            points[i].display(arduboy);
         }
     }
 
