@@ -19,6 +19,9 @@ private:
     // y position
     int y;
 
+    // The player trigger the movement
+    bool shouldMove = false;
+
     // How many pixels will it move
     int movingSpeed = 2;
 
@@ -62,6 +65,15 @@ public:
     }
 
     /**
+     * If the player has pressed on B while it
+     * was the last point added, then it will make it moving
+     */
+    void makeItMove()
+    {
+        shouldMove = true;
+    }
+
+    /**
      * Handles animation to make a point blink on screen.
      *
      * The idea is to layer multiple cercles to create a filled circle.
@@ -71,7 +83,7 @@ public:
      * It gives a circle that appears from its center, and deflate to finally disapper,
      * and repeats.
      */
-    void animate(Arduboy2 arduboy)
+    void display(Arduboy2 arduboy)
     {
         // If the point is not visible, we don't draw
         if (!visible) {
@@ -114,11 +126,16 @@ public:
         }
     }
 
+private:
     /**
      * Makes the point moving if it has been triggered (B Button)
      */
     void move(Arduboy2 arduboy)
     {
+        if (!shouldMove) {
+            return;
+        }
+
         movementTimer.updateCurrentTime();
 
         if (movementTimer.getElapsedTime() < movingDelay) {
