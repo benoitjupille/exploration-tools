@@ -130,6 +130,10 @@ struct Radar
         indexLastActivatedPoint++;
     }
 
+    /**
+     * Writes the numbers at the top of the screen
+     * and the counter of visible points
+     */
     void drawCounter(Arduboy2 arduboy)
     {
         arduboy.setTextSize(1);
@@ -143,8 +147,8 @@ struct Radar
             counterDecimal = rand() % 9 + 0;
         }
 
-            arduboy.setCursor(3, arduboy.height() - 9);
-            arduboy.print(indexLastActivatedPoint);
+        arduboy.setCursor(3, arduboy.height() - 9);
+        arduboy.print(indexLastActivatedPoint);
     }
 };
 
