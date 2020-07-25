@@ -1,9 +1,6 @@
 #ifndef BLINKINGPOINT_H
 #define BLINKINGPOINT_H
 
-#include <Arduboy2.h>
-#include "../shared/Timer.h"
-
 /**
  * Detected points by the radar.
  *

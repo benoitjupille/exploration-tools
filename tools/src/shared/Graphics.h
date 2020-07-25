@@ -1,8 +1,6 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
-#include <Arduboy2.h>
-
 /**
  * Drawing graphic helpers
  */

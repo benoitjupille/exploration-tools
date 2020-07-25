@@ -1,8 +1,6 @@
 #ifndef RADAR_H
 #define RADAR_H
 
-#include <Arduboy2.h>
-#include "../shared/Graphics.h"
 #include "DetectedPoint.h"
 
 /**

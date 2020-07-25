@@ -1,9 +1,8 @@
 #ifndef PHONE_H
 #define PHONE_H
 
-#include <Arduboy2.h>
 #include "bitmaps.h"
-#include "../shared/Timer.h"
+#include "ContactList.h"
 
 /**
  * A visio app to call Monkey or Frog or Robot
@@ -20,10 +19,13 @@ struct Phone
     // Timer to randomize the wait of the character to answer call
     Timer hangingTimer;
 
+    // List of contacts
+    ContactList contactList;
+
     int hangingRandomTime;
 
     // Index of the displayed character
-    int characterIndex = 0;
+    int selectedCharacter = 0;
 
     // Screen number
     // 0: contacts list
@@ -45,16 +47,16 @@ struct Phone
 
     int xConversationStart = 10;
 
-    // Amount of different characters in the game
-    int numberOfCharacters = 3;
+    int conversationLine[108];
+    int lineBufferIndex = 0;
 
     void display(Arduboy2 arduboy)
     {
         switch (screen) {
             case 0:
                 controlsContactsList(arduboy);
-                displayConctactsListTitle(arduboy);
-                displayContactsList(arduboy);
+                contactList.displayConctactsListTitle(arduboy, selectedCharacter);
+                contactList.displayContactsList(arduboy, selectedCharacter);
                 break;
             case 1:
                 displayCallHanging(arduboy);
@@ -71,13 +73,7 @@ struct Phone
      */
     void controlsContactsList(Arduboy2 arduboy)
     {
-        if (arduboy.justPressed(DOWN_BUTTON) && characterIndex < numberOfCharacters - 1) {
-            characterIndex++;
-        }
-
-        if (arduboy.justPressed(UP_BUTTON) && characterIndex > 0) {
-            characterIndex--;
-        }
+        selectedCharacter = contactList.selectCharacter(arduboy, selectedCharacter);
 
         if (arduboy.justPressed(A_BUTTON)) {
             animationTimer.updateCurrentTime();
@@ -89,46 +85,6 @@ struct Phone
             xAnimationCall = 54;
             hangingRandomTime = random(2000, 5000);
         }
-    }
-
-    /**
-     * Displays the title of contacts list Screen
-     */
-    void displayConctactsListTitle(Arduboy2 arduboy)
-    {
-        if (characterIndex > 0) {
-            return;
-        }
-
-        arduboy.setCursor(20, 3);
-        arduboy.setTextSize(2);
-        arduboy.print("CONTACTS");
-        arduboy.drawLine(0, 25, arduboy.width(), 25);
-    }
-
-    /**
-     * Displays contacts as a list
-     * When we reached the bottom of the screen but there are still
-     * contacts in the list, we make the character avatars going up
-     */
-    void displayContactsList(Arduboy2 arduboy)
-    {
-        int x = 53;
-
-        // We remove a value to y based on the index. This will make the list to go up.
-        int y = 32 - (26 * characterIndex);
-
-        for (int i=0; i < numberOfCharacters; i++) {
-            Sprites::drawOverwrite(x, y, charactersBmp, i);
-            y = y + 26;
-        }
-
-        // The cursor
-        arduboy.fillTriangle(
-            x - 20, 43- 4,
-            x - 20, 43 + 4,
-            x - 16, 43
-        );
     }
 
     void displayCallHanging(Arduboy2 arduboy)
@@ -168,6 +124,11 @@ struct Phone
         if (hangingTimer.getElapsedTime() >= hangingRandomTime) {
             screen = 2;
             animationTimer.updatePreviousTime();
+
+            // Populates line buffer with random indexes of alphabet symbols
+            for (int i=0; i<128; i++) {
+                conversationLine[i] = random(0, 30);
+            }
         }
     }
 
@@ -197,19 +158,22 @@ struct Phone
      */
     void drawAvatar (Arduboy2 arduboy, int x, int y)
     {
-        Sprites::drawOverwrite(x, y, charactersBmp, characterIndex);
+        Sprites::drawOverwrite(x, y, charactersBmp, selectedCharacter);
         arduboy.drawCircle(x + 11, y + 10, 18);
     }
 
     void displayConversation(Arduboy2 arduboy)
     {
         animationTimer.updateCurrentTime();
-        Sprites::drawOverwrite(10, 10, charactersBmp, characterIndex);
-        
-        if (animationTimer.getElapsedTime() >= 300 && xConversationStart < 128) {
-            Sprites::drawOverwrite(xConversationStart, 40, alphabetBmp, random(0, 30));
-            xConversationStart = xConversationStart + 10;
+        Sprites::drawOverwrite(10, 10, charactersBmp, selectedCharacter);
+
+        if (animationTimer.getElapsedTime() >= random(0, 200) && lineBufferIndex < sizeof(conversationLine) / sizeof(conversationLine[0])) {
+            lineBufferIndex = lineBufferIndex + random(1, 7);
             animationTimer.updatePreviousTime();
+        }
+
+        for (int i=0; i<lineBufferIndex; i++) {
+            Sprites::drawOverwrite(xConversationStart + i, 40, alphabetBmp, conversationLine[i]);
         }
 
         if (arduboy.justPressed(B_BUTTON)) {

@@ -12,6 +12,8 @@
 */
 
 #include <Arduboy2.h>
+#include "src/shared/Graphics.h"
+#include "src/shared/Timer.h"
 #include "src/radar/Radar.h"
 #include "src/phone/Phone.h"
 
@@ -30,7 +32,7 @@ void setup()
 
     // here we set the framerate to 15, we do not need to run at
     // default 60 and it saves us battery life
-    arduboy.setFrameRate(15);
+    arduboy.setFrameRate(30);
 
     arduboy.initRandomSeed();
     arduboy.setCursor(0, 0);
