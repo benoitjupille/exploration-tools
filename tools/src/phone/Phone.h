@@ -27,8 +27,6 @@ struct Phone
     // HangingCall animation
     HangingCall hangingCall;
 
-    int hangingRandomTime;
-
     // Index of the displayed character
     int selectedCharacter = 0;
 
@@ -40,15 +38,6 @@ struct Phone
 
     // Tells us if a screen transition occurs
     bool needToPlayHangingIntro = false;
-
-    // When a call is hanging, we animate a line of points
-    // between the character avatar and the phone icon.
-    // We hide a point on this line to make a movement from left
-    // to right
-    int lastHiddenHangingCallPoint = 0;
-
-    int xAnimationCall = 53;
-    int yAnimationCall = 22;
 
     int xConversationStart = 10;
 
@@ -67,15 +56,16 @@ struct Phone
                 displayConversation(arduboy);
                 break;
             case 1:
+                // Intro has not finished playing
                 if (needToPlayHangingIntro) {
                     needToPlayHangingIntro = hangingCall.introIsPlaying(arduboy, selectedCharacter);
                     return;
                 }
 
+                // Hanging animation
                 bool hanging = hangingCall.hanging(
                     arduboy,
                     sound,
-                    hangingRandomTime,
                     selectedCharacter
                 );
 
@@ -114,8 +104,6 @@ struct Phone
             hangingTimer.updatePreviousTime();
             screen = 1;
             needToPlayHangingIntro = true;
-            xAnimationCall = 54;
-            hangingRandomTime = random(4000, 10000);
             hangingCall.init();
         }
     }

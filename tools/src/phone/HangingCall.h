@@ -7,6 +7,7 @@
 struct HangingCall
 {
 
+private:
     // Timer for animations
     Timer animationTimer;
 
@@ -22,46 +23,98 @@ struct HangingCall
     // to right
     int lastHiddenHangingCallPoint = 0;
 
-    /**
-     * X position of where the animation begins
-     */
-    int xAnimationCall = 53;
+    // initial position of centered avatar
+    int const xForAvatarCenterd = 53;
 
-    /**
-     * Y position of where the animation begins
-     */
-    int yAnimationCall = 22;
+    // X position of where the animation begins
+    int xAnimation = 53;
 
+    // Y position of where the animation begins
+    int yAnimation = 22;
+
+public:
+    /**
+     * initialize the animation
+     */
     void init()
     {
         animationTimer.updateCurrentTime();
         animationTimer.updatePreviousTime();
         hangingTimer.updateCurrentTime();
         hangingTimer.updatePreviousTime();
+        hangingTime = random(4000, 10000);
     }
 
-    bool hanging(Arduboy2 arduboy, ArduboyTones sound, int hangingTimeToWait, int selectedCharacter)
+    /**
+     * Intro is playing. Returns true when the animation
+     * is still playing.
+     * 
+     * The intro shows an avatar of the selected char in the
+     * center of the screen, then this avatar moves to the left.
+     * 
+     * The animation stops when the avatar is on the left
+     */
+    bool introIsPlaying(Arduboy2 arduboy, int selectedCharacter)
+    {
+        animationTimer.updateCurrentTime();
+
+        // We limit the avatar position to avoid getting of the screen
+        if (xAnimation < 25) {
+            xAnimation = 25;
+        }
+
+        // Stays at center for a moment
+        if (animationTimer.getElapsedTime() < 700) {
+            drawAvatar(arduboy, xAnimation, yAnimation, selectedCharacter);
+            return true;
+        }
+
+        // Slides to the left
+        if (animationTimer.getElapsedTime() < 2000) {
+            drawAvatar(arduboy, xAnimation, yAnimation, selectedCharacter);
+            xAnimation = xAnimation - 2;
+            return true;
+        }
+
+        // Done
+        animationTimer.updatePreviousTime();
+        hangingTimer.updatePreviousTime();
+        return false;
+    }
+
+    /**
+     * Displays the animation loop when we wait to the character to
+     * pick up the phone
+     * 
+     * The avatar is shown on the left, and a phone icon on the right.
+     */
+    bool hanging(Arduboy2 arduboy, ArduboyTones sound, int selectedCharacter)
     {
         hangingTimer.updateCurrentTime();
         animationTimer.updateCurrentTime();
 
-        drawAvatar(arduboy, xAnimationCall, yAnimationCall, selectedCharacter);
-        Sprites::drawOverwrite(97, yAnimationCall , iconsBmp, 0);
+        // Avatar shown on left
+        drawAvatar(arduboy, xAnimation, yAnimation, selectedCharacter);
+        // Phone at the right
+        Sprites::drawOverwrite(97, yAnimation , iconsBmp, 0);
 
+        // draws a line of points between the avatar and the phone
         for (int i=0; i<40; i++) {
             if (i % 2 == 0) {
                 arduboy.drawPixel(60 + i, 32);
             }
         }
 
-        if (lastHiddenHangingCallPoint > 39) {
-            lastHiddenHangingCallPoint = 0;
-        }
-
+        // we blink points one by one, from left to right
         if (animationTimer.getElapsedTime() >= 20) {
             arduboy.drawPixel(60 + lastHiddenHangingCallPoint, 32, BLACK);
             animationTimer.updatePreviousTime();
             lastHiddenHangingCallPoint = lastHiddenHangingCallPoint + 2;
+        }
+
+        // Points blinking loop
+        if (lastHiddenHangingCallPoint > 39) {
+            lastHiddenHangingCallPoint = 0;
         }
 
         //sound.tones(song1);
@@ -72,7 +125,7 @@ struct HangingCall
         }
 
         // We wait for the character to pick up
-        if (hangingTimer.getElapsedTime() < hangingTimeToWait) {
+        if (hangingTimer.getElapsedTime() < hangingTime) {
             return true;
         }
 
@@ -81,33 +134,11 @@ struct HangingCall
         // Animation is finished, character picked up
         animationTimer.updatePreviousTime();
         hangingTimer.updatePreviousTime();
-        xAnimationCall = 54;
+        xAnimation = xForAvatarCenterd;
         return false;
     }
 
-    bool introIsPlaying(Arduboy2 arduboy, int selectedCharacter)
-    {
-        animationTimer.updateCurrentTime();
-
-        if (xAnimationCall < 25) {
-            xAnimationCall = 25;
-        }
-
-        if (animationTimer.getElapsedTime() < 700) {
-            drawAvatar(arduboy, xAnimationCall, yAnimationCall, selectedCharacter);
-            return true;
-        }
-
-        if (animationTimer.getElapsedTime() < 2000) {
-            drawAvatar(arduboy, xAnimationCall, yAnimationCall, selectedCharacter);
-            xAnimationCall = xAnimationCall - 2;
-            return true;
-        }
-
-        animationTimer.updatePreviousTime();
-        hangingTimer.updatePreviousTime();
-        return false;
-    }
+private:
 
     /**
      * Draws the avatar of the selecter char at the position you want
