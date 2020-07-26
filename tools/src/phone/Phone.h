@@ -2,7 +2,9 @@
 #define PHONE_H
 
 #include "bitmaps.h"
+#include "tones.h"
 #include "ContactList.h"
+#include "HangingCall.h"
 
 /**
  * A visio app to call Monkey or Frog or Robot
@@ -22,6 +24,9 @@ struct Phone
     // List of contacts
     ContactList contactList;
 
+    // HangingCall animation
+    HangingCall hangingCall;
+
     int hangingRandomTime;
 
     // Index of the displayed character
@@ -34,7 +39,7 @@ struct Phone
     int screen = 0;
 
     // Tells us if a screen transition occurs
-    bool screenJustSwitched = false;
+    bool needToPlayHangingIntro = false;
 
     // When a call is hanging, we animate a line of points
     // between the character avatar and the phone icon.
@@ -50,7 +55,7 @@ struct Phone
     int conversationLine[108];
     int lineBufferIndex = 0;
 
-    void display(Arduboy2 arduboy)
+    void display(Arduboy2 arduboy, ArduboyTones sound)
     {
         switch (screen) {
             case 0:
@@ -58,11 +63,38 @@ struct Phone
                 contactList.displayConctactsListTitle(arduboy, selectedCharacter);
                 contactList.displayContactsList(arduboy, selectedCharacter);
                 break;
-            case 1:
-                displayCallHanging(arduboy);
-                break;
             case 2:
                 displayConversation(arduboy);
+                break;
+            case 1:
+                if (needToPlayHangingIntro) {
+                    needToPlayHangingIntro = hangingCall.introIsPlaying(arduboy, selectedCharacter);
+                    return;
+                }
+
+                bool hanging = hangingCall.hanging(
+                    arduboy,
+                    sound,
+                    hangingRandomTime,
+                    selectedCharacter
+                );
+
+                if (arduboy.justPressed(B_BUTTON)) {
+                    screen = 0;
+                }
+
+                if (hanging) {
+                    return;
+                }
+
+                screen = 2;
+
+                // Populates line buffer with random indexes of alphabet symbols
+                for (int i=0; i<108; i++) {
+                    conversationLine[i] = random(0, 30);
+                }
+                animationTimer.updatePreviousTime();
+
                 break;
         }
     }
@@ -81,85 +113,11 @@ struct Phone
             hangingTimer.updateCurrentTime();
             hangingTimer.updatePreviousTime();
             screen = 1;
-            screenJustSwitched = true;
+            needToPlayHangingIntro = true;
             xAnimationCall = 54;
-            hangingRandomTime = random(2000, 5000);
+            hangingRandomTime = random(4000, 10000);
+            hangingCall.init();
         }
-    }
-
-    void displayCallHanging(Arduboy2 arduboy)
-    {
-        animationTimer.updateCurrentTime();
-        hangingTimer.updateCurrentTime();
-
-        if (screenJustSwitched) {
-            animationCallLaunched(arduboy);
-            return;
-        }
-
-        drawAvatar(arduboy, xAnimationCall, yAnimationCall);
-        Sprites::drawOverwrite(97, yAnimationCall , iconsBmp, 0);
-
-        for (int i=0; i<40; i++) {
-            if (i % 2 == 0) {
-                arduboy.drawPixel(60 + i, 32);
-            }
-        }
-
-        if (lastHiddenHangingCallPoint > 39) {
-            lastHiddenHangingCallPoint = 0;
-        }
-
-        if (animationTimer.getElapsedTime() >= 20) {
-            arduboy.drawPixel(60 + lastHiddenHangingCallPoint, 32, BLACK);
-            animationTimer.updatePreviousTime();
-            lastHiddenHangingCallPoint = lastHiddenHangingCallPoint + 2;
-        }
-
-        if (arduboy.justPressed(B_BUTTON)) {
-            screen = 0;
-            return;
-        }
-
-        if (hangingTimer.getElapsedTime() >= hangingRandomTime) {
-            screen = 2;
-            animationTimer.updatePreviousTime();
-
-            // Populates line buffer with random indexes of alphabet symbols
-            for (int i=0; i<128; i++) {
-                conversationLine[i] = random(0, 30);
-            }
-        }
-    }
-
-    void animationCallLaunched(Arduboy2 arduboy)
-    {
-        if (xAnimationCall < 25) {
-            xAnimationCall = 25;
-        }
-
-        if (animationTimer.getElapsedTime() < 700) {
-            drawAvatar(arduboy, xAnimationCall, yAnimationCall);
-            return;
-        }
-
-        if (animationTimer.getElapsedTime() < 2000) {
-            drawAvatar(arduboy, xAnimationCall, yAnimationCall);
-            xAnimationCall = xAnimationCall - 2;
-
-            return;
-        }
-
-        screenJustSwitched = false;
-    }
-
-    /**
-     * Draws the avatar of the selecter char at the position you want
-     */
-    void drawAvatar (Arduboy2 arduboy, int x, int y)
-    {
-        Sprites::drawOverwrite(x, y, charactersBmp, selectedCharacter);
-        arduboy.drawCircle(x + 11, y + 10, 18);
     }
 
     void displayConversation(Arduboy2 arduboy)

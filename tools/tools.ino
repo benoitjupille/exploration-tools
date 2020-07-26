@@ -12,6 +12,7 @@
 */
 
 #include <Arduboy2.h>
+#include <ArduboyTones.h>
 #include "src/shared/Graphics.h"
 #include "src/shared/Timer.h"
 #include "src/radar/Radar.h"
@@ -19,6 +20,7 @@
 
 // make an instance of arduboy used for many functions
 Arduboy2 arduboy;
+ArduboyTones sound(arduboy.audio.enabled);
 
 Radar radar;
 Phone phone;
@@ -51,7 +53,7 @@ void loop()
     arduboy.pollButtons();
 
     //radar.display(arduboy);
-    phone.display(arduboy);
+    phone.display(arduboy, sound);
 
     // then we finaly we tell the arduboy to display what we just wrote to the display
     arduboy.display();

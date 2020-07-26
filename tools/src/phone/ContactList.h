@@ -1,12 +1,17 @@
 #ifndef CONTACTLIST_H
 #define CONTACTLIST_H
 
+/**
+ * A class to display a characters list, and to select one
+ */
 struct ContactList
 {
 
+private:
     // Amount of different characters in the game
     int numberOfCharacters = 3;
 
+public:
     /**
      * Selects the character index according to buttons pushed
      */
