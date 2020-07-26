@@ -15,22 +15,22 @@ private:
     Timer hangingTimer;
 
     // A random time in milliseconds that the called character will pick up
-    int hangingTime;
+    int unsigned hangingTime;
 
     // When a call is hanging, we animate a line of points
     // between the character avatar and the phone icon.
     // We hide a point on this line to make a movement from left
     // to right
-    int lastHiddenHangingCallPoint = 0;
+    uint8_t lastHiddenHangingCallPoint = 0;
 
     // initial position of centered avatar
-    int const xForAvatarCenterd = 53;
+    uint8_t const xForAvatarCenterd = 53;
 
     // X position of where the animation begins
-    int xAnimation = 53;
+    uint8_t xAnimation = 53;
 
     // Y position of where the animation begins
-    int yAnimation = 22;
+    uint8_t yAnimation = 22;
 
 public:
     /**
@@ -117,7 +117,9 @@ public:
             lastHiddenHangingCallPoint = 0;
         }
 
-        //sound.tones(song1);
+        if (animationTimer.getElapsedTime() < 20) {
+            //sound.tones(song1);
+        }
 
         if (animationTimer.getElapsedTime() >= 300) {
             sound.noTone();

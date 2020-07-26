@@ -28,65 +28,79 @@ struct Phone
     HangingCall hangingCall;
 
     // Index of the displayed character
-    int selectedCharacter = 0;
+    uint8_t selectedCharacter = 0;
 
-    // Screen number
-    // 0: contacts list
-    // 1: call hanging
-    // 2: conversation
-    int screen = 0;
+    // Screens
+    enum struct Screen {
+        ContactList,        // the list of contacts to chose
+        Hanging,            // call is launched, you wait for the character to pickup
+        Conversation        // the character and you have a conversation
+    };
+
+    // Selected screen
+    Screen screen = Screen::ContactList;
 
     // Tells us if a screen transition occurs
     bool needToPlayHangingIntro = false;
 
-    int xConversationStart = 10;
+    uint8_t xConversationStart = 10;
 
-    int conversationLine[108];
-    int lineBufferIndex = 0;
+    uint8_t conversationLine[108];
+    uint8_t lineBufferIndex = 0;
 
     void display(Arduboy2 arduboy, ArduboyTones sound)
     {
         switch (screen) {
-            case 0:
-                controlsContactsList(arduboy);
-                contactList.displayConctactsListTitle(arduboy, selectedCharacter);
-                contactList.displayContactsList(arduboy, selectedCharacter);
+            case Screen::ContactList:
+                contactListScreen(arduboy);
                 break;
-            case 2:
+            case Screen::Conversation:
                 displayConversation(arduboy);
                 break;
-            case 1:
-                // Intro has not finished playing
-                if (needToPlayHangingIntro) {
-                    needToPlayHangingIntro = hangingCall.introIsPlaying(arduboy, selectedCharacter);
-                    return;
-                }
-
-                // Hanging animation
-                bool hanging = hangingCall.hanging(
-                    arduboy,
-                    sound,
-                    selectedCharacter
-                );
-
-                if (arduboy.justPressed(B_BUTTON)) {
-                    screen = 0;
-                }
-
-                if (hanging) {
-                    return;
-                }
-
-                screen = 2;
-
-                // Populates line buffer with random indexes of alphabet symbols
-                for (int i=0; i<108; i++) {
-                    conversationLine[i] = random(0, 30);
-                }
-                animationTimer.updatePreviousTime();
-
+            case Screen::Hanging:
+                hangingCallScreen(arduboy, sound);
                 break;
         }
+    }
+
+    void contactListScreen(Arduboy2 arduboy)
+    {
+        controlsContactsList(arduboy);
+        contactList.displayConctactsListTitle(arduboy, selectedCharacter);
+        contactList.displayContactsList(arduboy, selectedCharacter);
+    }
+
+    void hangingCallScreen(Arduboy2 arduboy, ArduboyTones sound)
+    {
+        // Intro has not finished playing
+        if (needToPlayHangingIntro) {
+            needToPlayHangingIntro = hangingCall.introIsPlaying(arduboy, selectedCharacter);
+            return;
+        }
+
+        // Hanging animation
+        bool hanging = hangingCall.hanging(
+            arduboy,
+            sound,
+            selectedCharacter
+        );
+
+        if (arduboy.justPressed(B_BUTTON)) {
+            screen = Screen::ContactList;
+        }
+
+        if (hanging) {
+            return;
+        }
+
+        screen = Screen::Conversation;
+
+        // Populates line buffer with random indexes of alphabet symbols
+        for (int i=0; i<108; i++) {
+            conversationLine[i] = random(0, 30);
+        }
+
+        animationTimer.updatePreviousTime();
     }
 
     /**
@@ -102,7 +116,7 @@ struct Phone
             animationTimer.updatePreviousTime();
             hangingTimer.updateCurrentTime();
             hangingTimer.updatePreviousTime();
-            screen = 1;
+            screen = Screen::Hanging;
             needToPlayHangingIntro = true;
             hangingCall.init();
         }
@@ -123,7 +137,7 @@ struct Phone
         }
 
         if (arduboy.justPressed(B_BUTTON)) {
-            screen = 0;
+            screen = Screen::ContactList;
             return;
         }
     }

@@ -9,7 +9,7 @@ struct ContactList
 
 private:
     // Amount of different characters in the game
-    int numberOfCharacters = 3;
+    uint8_t numberOfCharacters = 3;
 
 public:
     /**

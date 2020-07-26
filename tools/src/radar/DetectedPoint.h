@@ -20,7 +20,7 @@ private:
     bool shouldMove = false;
 
     // How many pixels will it move
-    int movingSpeed = 2;
+    uint8_t movingSpeed = 2;
 
     // Moves every x milliseconds
     int movingDelay = 700;

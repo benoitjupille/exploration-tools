@@ -23,13 +23,13 @@ struct Radar
     float speed = 0.1;
 
     // Number to start the counter
-    int counter = 44;
+    uint8_t counter = 44;
 
     // Decimals of the counter
-    int counterDecimal;
+    uint8_t counterDecimal;
 
     // The next frame when the counter should be updated
-    int frameToAnimateCounter = 10;
+    uint8_t frameToAnimateCounter = 10;
 
     // Collection of points
     DetectedPoint points[5] {
@@ -41,7 +41,7 @@ struct Radar
     };
 
     // Last activated points
-    int indexLastActivatedPoint = 0;
+    uint8_t indexLastActivatedPoint = 0;
 
     /**
      * Displays the radar and the points
