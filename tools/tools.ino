@@ -25,6 +25,13 @@ ArduboyTones sound(arduboy.audio.enabled);
 Radar radar;
 Phone phone;
 
+enum struct Screen {
+    Radar,
+    Phone
+};
+
+Screen screen = Screen::Phone;
+
 // This function runs once in your game.
 // use it for anything that needs to be set only once in your game.
 void setup()
@@ -52,11 +59,36 @@ void loop()
     arduboy.clear();
     arduboy.pollButtons();
 
-    //radar.display(arduboy);
-    phone.display(arduboy, sound);
+    switch (screen) {
+        case Screen::Radar:
+            radarGame();
+            break;
+        case Screen::Phone:
+            phoneGame();
+            break;
+    }
 
     // then we finaly we tell the arduboy to display what we just wrote to the display
     arduboy.display();
+}
+
+void radarGame()
+{
+    radar.display(arduboy);
+
+    if (arduboy.justPressed(LEFT_BUTTON) || arduboy.justPressed(RIGHT_BUTTON)) {
+        phone.init();
+        screen = Screen::Phone;
+    }
+}
+
+void phoneGame()
+{
+    phone.display(arduboy, sound);
+
+    if (arduboy.justPressed(LEFT_BUTTON) || arduboy.justPressed(RIGHT_BUTTON)) {
+        screen = Screen::Radar;
+    }
 }
 
 

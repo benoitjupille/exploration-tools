@@ -5,6 +5,7 @@
 #include "tones.h"
 #include "ContactList.h"
 #include "HangingCall.h"
+#include "Conversation.h"
 
 /**
  * A visio app to call Monkey or Frog or Robot
@@ -15,6 +16,7 @@
 struct Phone
 {
 
+private:
     // Timer for animations
     Timer animationTimer;
 
@@ -26,6 +28,9 @@ struct Phone
 
     // HangingCall animation
     HangingCall hangingCall;
+
+    // Conversation
+    Conversation conversation;
 
     // Index of the displayed character
     uint8_t selectedCharacter = 0;
@@ -43,10 +48,11 @@ struct Phone
     // Tells us if a screen transition occurs
     bool needToPlayHangingIntro = false;
 
-    uint8_t xConversationStart = 10;
-
-    uint8_t conversationLine[108];
-    uint8_t lineBufferIndex = 0;
+public:
+    void init() {
+        selectedCharacter = 0;
+        screen = Screen::ContactList;
+    }
 
     void display(Arduboy2 arduboy, ArduboyTones sound)
     {
@@ -54,15 +60,19 @@ struct Phone
             case Screen::ContactList:
                 contactListScreen(arduboy);
                 break;
-            case Screen::Conversation:
-                displayConversation(arduboy);
-                break;
             case Screen::Hanging:
                 hangingCallScreen(arduboy, sound);
+                break;
+            case Screen::Conversation:
+                conversationScreen(arduboy);
                 break;
         }
     }
 
+private:
+    /**
+     * Handles contact list screen 
+     */
     void contactListScreen(Arduboy2 arduboy)
     {
         controlsContactsList(arduboy);
@@ -70,6 +80,9 @@ struct Phone
         contactList.displayContactsList(arduboy, selectedCharacter);
     }
 
+    /**
+     * Handles hanging call screen
+     */
     void hangingCallScreen(Arduboy2 arduboy, ArduboyTones sound)
     {
         // Intro has not finished playing
@@ -93,14 +106,8 @@ struct Phone
             return;
         }
 
+        conversation.init();
         screen = Screen::Conversation;
-
-        // Populates line buffer with random indexes of alphabet symbols
-        for (int i=0; i<108; i++) {
-            conversationLine[i] = random(0, 30);
-        }
-
-        animationTimer.updatePreviousTime();
     }
 
     /**
@@ -122,20 +129,9 @@ struct Phone
         }
     }
 
-    void displayConversation(Arduboy2 arduboy)
+    void conversationScreen(Arduboy2 arduboy)
     {
-        animationTimer.updateCurrentTime();
-        Sprites::drawOverwrite(10, 10, charactersBmp, selectedCharacter);
-
-        if (animationTimer.getElapsedTime() >= random(0, 200) && lineBufferIndex < sizeof(conversationLine) / sizeof(conversationLine[0])) {
-            lineBufferIndex = lineBufferIndex + random(1, 7);
-            animationTimer.updatePreviousTime();
-        }
-
-        for (int i=0; i<lineBufferIndex; i++) {
-            Sprites::drawOverwrite(xConversationStart + i, 40, alphabetBmp, conversationLine[i]);
-        }
-
+        conversation.display(selectedCharacter);
         if (arduboy.justPressed(B_BUTTON)) {
             screen = Screen::ContactList;
             return;
