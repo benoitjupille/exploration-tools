@@ -31,16 +31,22 @@ struct ConversationLine
     // The last char is a space character
     uint8_t alphabetSize = 30;
 
+    // Is the buffer moving forward ?
+    // We need this to sync the sound and the mouth character animation
+    bool playing = false;
+
     // line is printed completely
     bool locked = false;
 
     void init(uint8_t yPosition)
     {
+        arduboy.initRandomSeed();
         animationTimer.updateCurrentTime();
         animationTimer.updatePreviousTime();
         y = yPosition;
         bufferIndex = 0;
         locked = false;
+        playing = false;
 
         // Populates line buffer with random indexes of alphabet symbols
         for (int i=0; i<10; i++) {
@@ -65,11 +71,13 @@ struct ConversationLine
     void display()
     {
         animationTimer.updateCurrentTime();
+        playing = false;
 
         // we increment the buffer size every random time to make typing animation
         if (animationTimer.getElapsedTime() >= random(100, 600) && bufferIndex < maxLength) {
             bufferIndex = bufferIndex + random(1, 4);
             animationTimer.updatePreviousTime();
+            playing = true;
         }
 
         for (int i=0; i<bufferIndex; i++) {
@@ -78,6 +86,7 @@ struct ConversationLine
 
         if (bufferIndex >= maxLength - 1) {
             locked = true;
+            playing = false;
         }
     }
 

@@ -64,7 +64,7 @@ public:
                 hangingCallScreen(arduboy, sound);
                 break;
             case Screen::Conversation:
-                conversationScreen(arduboy);
+                conversationScreen(arduboy, sound);
                 break;
         }
     }
@@ -129,9 +129,9 @@ private:
         }
     }
 
-    void conversationScreen(Arduboy2 arduboy)
+    void conversationScreen(Arduboy2 arduboy, ArduboyTones sound)
     {
-        conversation.display(arduboy, selectedCharacter);
+        conversation.display(arduboy, sound, selectedCharacter);
         if (arduboy.justPressed(B_BUTTON)) {
             screen = Screen::ContactList;
             return;

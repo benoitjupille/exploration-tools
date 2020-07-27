@@ -20,10 +20,12 @@ struct Conversation
         ConversationLine(),
     };
 
-    int mouthsPosition[3][4] = {
-        {30, 22, 2, 2},
-        {26, 20, 2, 2},
-        {26, 20, 2, 2}
+    // Mouths animation by character
+    // x, y, height, width, smaller to bigger mouth
+    int mouthsPosition[3][5] = {
+        {30, 22, 2, 2, 1},
+        {29, 21, 2, 2, 3},
+        {29, 23, 2, 2, 4}
     };
 
     void init()
@@ -36,7 +38,7 @@ struct Conversation
         lines[1].init(52);
     }
 
-    void display(Arduboy2 arduboy, uint8_t selectedCharacter)
+    void display(Arduboy2 arduboy, ArduboyTones sound, uint8_t selectedCharacter)
     {
         animationTimer.updateCurrentTime();
         mouthTimer.updateCurrentTime();
@@ -51,11 +53,6 @@ struct Conversation
             1
         );
 
-        if (mouthTimer.getElapsedTime() >= random(300)) {
-            mouthsPosition[selectedCharacter][2] = random(1, 3);
-            mouthsPosition[selectedCharacter][3] = random(1, 3);
-            mouthTimer.updatePreviousTime();
-        }
 
         // displays first line
         lines[0].display();
@@ -67,8 +64,24 @@ struct Conversation
             }
         }
 
+        for (uint8_t i=0; i<2; i++) {
+            if (!lines[i].playing) {
+                continue;
+            }
+
+            if (mouthTimer.getElapsedTime() >= random(200)) {
+                mouthsPosition[selectedCharacter][2] = random(1, 3) * mouthsPosition[selectedCharacter][4];
+                mouthsPosition[selectedCharacter][3] = random(1, 3);
+                mouthTimer.updatePreviousTime();
+            }
+
+            if (!sound.playing()) {
+                sound.tones(words[random(0, 6)]);
+            }
+        }
+
         // Let some time before making new lines
-        if (animationTimer.getElapsedTime() >= random(6000, 7000)) {
+        if (animationTimer.getElapsedTime() >= random(4000, 10000)) {
             init();
         }
     }
