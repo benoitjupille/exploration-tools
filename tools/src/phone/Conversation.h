@@ -31,13 +31,17 @@ struct Conversation
         animationTimer.updateCurrentTime();
         Sprites::drawOverwrite(10, 10, charactersBmp, selectedCharacter);
 
+        // displays first line
         lines[0].display();
+
+        // for next lines, we check if previous line has finished to print
         for (uint8_t i=1; i<2; i++) {
             if (lines[i-1].locked) {
                 lines[i].display();
             }
         }
 
+        // Let some time before making new lines
         if (animationTimer.getElapsedTime() >= random(6000, 7000)) {
             init();
         }
