@@ -131,7 +131,7 @@ private:
 
     void conversationScreen(Arduboy2 arduboy)
     {
-        conversation.display(selectedCharacter);
+        conversation.display(arduboy, selectedCharacter);
         if (arduboy.justPressed(B_BUTTON)) {
             screen = Screen::ContactList;
             return;

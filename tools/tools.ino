@@ -45,6 +45,9 @@ void setup()
 
     arduboy.initRandomSeed();
     arduboy.setCursor(0, 0);
+
+    arduboy.audio.begin();
+    arduboy.audio.on();
 }
 
 // our main game loop, this runs once every cycle/frame.

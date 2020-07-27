@@ -12,24 +12,50 @@ struct Conversation
     // Timer for animations
     Timer animationTimer;
 
+    Timer mouthTimer;
+
     // Lines to display text
     ConversationLine lines[2] = {
         ConversationLine(),
         ConversationLine(),
     };
 
+    int mouthsPosition[3][4] = {
+        {30, 22, 2, 2},
+        {26, 20, 2, 2},
+        {26, 20, 2, 2}
+    };
+
     void init()
     {
         animationTimer.updateCurrentTime();
         animationTimer.updatePreviousTime();
-        lines[0].init(40);
-        lines[1].init(50);
+        mouthTimer.updateCurrentTime();
+        mouthTimer.updatePreviousTime();
+        lines[0].init(42);
+        lines[1].init(52);
     }
 
-    void display(uint8_t selectedCharacter)
+    void display(Arduboy2 arduboy, uint8_t selectedCharacter)
     {
         animationTimer.updateCurrentTime();
-        Sprites::drawOverwrite(10, 10, charactersBmp, selectedCharacter);
+        mouthTimer.updateCurrentTime();
+
+        arduboy.drawRect(15, 0, 34, 34);
+        Sprites::drawOverwrite(20, 7, charactersBmp, selectedCharacter);
+        arduboy.fillRect(
+            mouthsPosition[selectedCharacter][0],
+            mouthsPosition[selectedCharacter][1],
+            mouthsPosition[selectedCharacter][2],
+            mouthsPosition[selectedCharacter][3],
+            1
+        );
+
+        if (mouthTimer.getElapsedTime() >= random(300)) {
+            mouthsPosition[selectedCharacter][2] = random(1, 3);
+            mouthsPosition[selectedCharacter][3] = random(1, 3);
+            mouthTimer.updatePreviousTime();
+        }
 
         // displays first line
         lines[0].display();

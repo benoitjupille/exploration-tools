@@ -117,13 +117,8 @@ public:
             lastHiddenHangingCallPoint = 0;
         }
 
-        if (animationTimer.getElapsedTime() < 20) {
-            //sound.tones(song1);
-        }
-
-        if (animationTimer.getElapsedTime() >= 300) {
-            sound.noTone();
-            animationTimer.updatePreviousTime();
+        if (!sound.playing()) {
+            sound.tones(ringTone);
         }
 
         // We wait for the character to pick up
