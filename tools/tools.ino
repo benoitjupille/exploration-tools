@@ -13,6 +13,9 @@
 
 #include <Arduboy2.h>
 #include <ArduboyTones.h>
+
+#include "src/shared/bitmaps.h"
+
 #include "src/shared/Graphics.h"
 #include "src/shared/Timer.h"
 #include "src/radar/Radar.h"
